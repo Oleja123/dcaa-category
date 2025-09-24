@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/Oleja123/dcaa-category/internal/domain/category"
-	categorydb "github.com/Oleja123/dcaa-category/internal/repository/categorymock/db"
+	categorydb "github.com/Oleja123/dcaa-category/internal/infrastructure/category/db"
 	"github.com/Oleja123/dcaa-property/pkg/client"
 	"github.com/Oleja123/dcaa-property/pkg/client/postgresql"
 	"github.com/Oleja123/dcaa-property/pkg/config"

@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"time"
 
+	categoryservice "github.com/Oleja123/dcaa-category/internal/application/category"
 	categoryhandler "github.com/Oleja123/dcaa-category/internal/handler/category"
-	categorydb "github.com/Oleja123/dcaa-category/internal/repository/categorymock/db"
-	categoryservice "github.com/Oleja123/dcaa-category/internal/service/category"
+	categorydb "github.com/Oleja123/dcaa-category/internal/infrastructure/category/db"
 	"github.com/Oleja123/dcaa-property/pkg/client/postgresql"
 	"github.com/Oleja123/dcaa-property/pkg/config"
 )

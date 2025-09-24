@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	categorymock "github.com/Oleja123/dcaa-category/internal/repository/categorymock"
-	categoryservice "github.com/Oleja123/dcaa-category/internal/service/category"
+	categoryservice "github.com/Oleja123/dcaa-category/internal/application/category"
+	categorymock "github.com/Oleja123/dcaa-category/internal/infrastructure/category"
 	categorydto "github.com/Oleja123/dcaa-property/pkg/dto/category"
 	optionalType "github.com/denpa16/optional-go-type"
 	"github.com/stretchr/testify/assert"
