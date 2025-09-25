@@ -7,6 +7,7 @@ import (
 	categoryservice "github.com/Oleja123/dcaa-category/internal/application/category"
 	categorymock "github.com/Oleja123/dcaa-category/internal/infrastructure/category"
 	categorydto "github.com/Oleja123/dcaa-property/pkg/dto/category"
+	myErrors "github.com/Oleja123/dcaa-property/pkg/errors"
 	optionalType "github.com/denpa16/optional-go-type"
 	"github.com/stretchr/testify/assert"
 )
@@ -31,8 +32,16 @@ func TestCategoryService(t *testing.T) {
 	err = service.Update(ctx, dto)
 	assert.NoError(t, err)
 
+	id = 0
+	dto.Id = optionalType.NewOptionalInt(&id)
+	err = service.Update(ctx, dto)
+	assert.ErrorAs(t, err, &myErrors.ErrNotFound)
+
 	err = service.Delete(ctx, 1)
 	assert.NoError(t, err)
+
+	err = service.Delete(ctx, 0)
+	assert.ErrorAs(t, err, &myErrors.ErrNotFound)
 
 	all, err := service.FindAll(ctx)
 	assert.NoError(t, err)
@@ -42,4 +51,7 @@ func TestCategoryService(t *testing.T) {
 	found, err := service.FindOne(ctx, 1)
 	assert.NoError(t, err)
 	assert.Equal(t, "Category", *found.Name.Value)
+
+	_, err = service.FindOne(ctx, 0)
+	assert.ErrorAs(t, err, &myErrors.ErrNotFound)
 }

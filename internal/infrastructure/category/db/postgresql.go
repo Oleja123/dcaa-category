@@ -6,7 +6,8 @@ import (
 
 	category "github.com/Oleja123/dcaa-category/internal/domain/category"
 	"github.com/Oleja123/dcaa-property/pkg/client"
-	"github.com/jackc/pgx/v5/pgconn"
+	myErrors "github.com/Oleja123/dcaa-property/pkg/errors"
+	"github.com/jackc/pgx/v5"
 )
 
 type repository struct {
@@ -21,10 +22,7 @@ func (r *repository) Create(ctx context.Context, c category.Category) (int, erro
 	`
 	err := r.client.QueryRow(ctx, q, c.Name, c.Info).Scan(&c.Id)
 	if err != nil {
-		if pgErr, ok := err.(*pgconn.PgError); ok {
-			return 0, fmt.Errorf("SQL Error: %s, Detail: %s, Where: %s", pgErr.Message, pgErr.Detail, pgErr.Where)
-		}
-		return 0, err
+		return 0, myErrors.ErrInternalError
 	}
 	return c.Id, nil
 }
@@ -35,10 +33,10 @@ func (r *repository) Delete(ctx context.Context, id int) error {
 	`
 	_, err := r.client.Exec(ctx, q, id)
 	if err != nil {
-		if pgErr, ok := err.(*pgconn.PgError); ok {
-			return fmt.Errorf("SQL Error: %s, Detail: %s, Where: %s", pgErr.Message, pgErr.Detail, pgErr.Where)
+		if err == pgx.ErrNoRows {
+			return fmt.Errorf("не найдена категория по id: %d: %w", id, myErrors.ErrNotFound)
 		}
-		return err
+		return myErrors.ErrInternalError
 	}
 	return nil
 }
@@ -50,7 +48,7 @@ func (r *repository) FindAll(ctx context.Context) ([]category.Category, error) {
 
 	rows, err := r.client.Query(ctx, q)
 	if err != nil {
-		return nil, err
+		return nil, myErrors.ErrInternalError
 	}
 	defer rows.Close()
 
@@ -59,14 +57,14 @@ func (r *repository) FindAll(ctx context.Context) ([]category.Category, error) {
 		var c category.Category
 		err := rows.Scan(&c.Id, &c.Name, &c.Info)
 		if err != nil {
-			return nil, err
+			return nil, myErrors.ErrInternalError
 		}
 
 		categories = append(categories, c)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, myErrors.ErrInternalError
 	}
 
 	return categories, nil
@@ -81,7 +79,11 @@ func (r *repository) FindOne(ctx context.Context, id int) (category.Category, er
 	var c category.Category
 	err := r.client.QueryRow(ctx, q, id).Scan(&c.Id, &c.Name, &c.Info)
 	if err != nil {
-		return category.Category{}, err
+		if err == pgx.ErrNoRows {
+			return category.Category{}, fmt.Errorf("не найдена категория по id: %d: %w", id, myErrors.ErrNotFound)
+		} else {
+			return category.Category{}, myErrors.ErrInternalError
+		}
 	}
 
 	return c, nil
@@ -95,10 +97,7 @@ func (r *repository) Update(ctx context.Context, p category.Category) error {
 
 	_, err := r.client.Exec(ctx, q, p.Name, p.Info, p.Id)
 	if err != nil {
-		if pgErr, ok := err.(*pgconn.PgError); ok {
-			return fmt.Errorf("SQL Error: %s, Detail: %s, Where: %s", pgErr.Message, pgErr.Detail, pgErr.Where)
-		}
-		return err
+		return myErrors.ErrInternalError
 	}
 	return nil
 }
